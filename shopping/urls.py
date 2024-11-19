@@ -1,7 +1,7 @@
 
 from django.urls import path, include
 
-from .api.router import router
+from shopping.api.router import router
 
 
 urlpatterns = [
