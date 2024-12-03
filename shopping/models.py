@@ -11,26 +11,28 @@ class Product(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+class OrderStatus(models.enums.Choices):
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+
+class Order(models.Model):
+    status = models.CharField(OrderStatus, max_length=20)
+    # @property
+    # def total_price (self):
+#         For each CartItem, add their totals
+
+
 class CartItem(models.Model):
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
 
     @property
-    def total (self):
-        return self.item.price *  self.quantity
+    def total(self):
+        return self.item.price * self.quantity
 
     def save(self, **kwargs):
         product = self.item
         product.stock = product.stock - self.quantity
         product.save()
         super().save(**kwargs)
-
-
-class OrderStatus(models.enums.Choices):
-    PENDING = 'pending'
-    COMPLETED = 'completed'
-
-class Order(models.Model):
-    items = models.ForeignKey(CartItem, on_delete=models.DO_NOTHING)
-    status = models.CharField(OrderStatus, max_length=20)
-
