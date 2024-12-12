@@ -1,4 +1,3 @@
-from django.db.models import ForeignKey
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, DecimalField, IntegerField
@@ -34,6 +33,18 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
     status = CharField(max_length=20, read_only=True)
+    buyer = RelatedField(many=False, read_only=True)
+
+    def create(self, validated_data):
+        product = validated_data['item']
+        if validated_data['quantity'] > product.stock:
+            raise ValidationError('Too many')
+        return super().create(validated_data)
+
+
     class Meta:
         model = Order
-        fields = ('id', 'status', 'url')
+        fields = ('id', 'status', 'buyer', 'url')
+
+
+

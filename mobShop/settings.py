@@ -30,6 +30,16 @@ ALLOWED_HOSTS = [
     'localhost',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
 
 # Application definition
 
@@ -41,7 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shopping.apps.ShoppingConfig',
-    'rest_framework'
+    'rest_framework',
 
 ]
 

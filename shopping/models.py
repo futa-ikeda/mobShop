@@ -1,5 +1,4 @@
-from decimal import Decimal
-
+from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
@@ -17,6 +16,7 @@ class OrderStatus(models.enums.Choices):
 
 class Order(models.Model):
     status = models.CharField(OrderStatus, max_length=20)
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE)
     # @property
     # def total_price (self):
 #         For each CartItem, add their totals
@@ -25,7 +25,7 @@ class Order(models.Model):
 class CartItem(models.Model):
     item = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     @property
     def total(self):
