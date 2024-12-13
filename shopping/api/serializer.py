@@ -25,7 +25,12 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         product = validated_data['item']
         if validated_data['quantity'] > product.stock:
             raise ValidationError('Too many')
+        buyer = self.context['request'].user
+        if not buyer:
+            raise ValidationError('not authorised')
+        validated_data['buyer'] = buyer
         return super().create(validated_data)
+
 
     class Meta:
         model = CartItem
@@ -33,18 +38,22 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
     status = CharField(max_length=20, read_only=True)
-    buyer = RelatedField(many=False, read_only=True)
+
 
     def create(self, validated_data):
-        product = validated_data['item']
-        if validated_data['quantity'] > product.stock:
-            raise ValidationError('Too many')
-        return super().create(validated_data)
-
+        buyer = self.context['request'].user
+        cartitems = self.context['request'].user.cartitem_set.all()
+        if not cartitems:
+            raise ValidationError('cart is empty')
+        order = super().create(validated_data)
+        for item in cartitems:
+            item.order = order
+            item.save()
+        return order
 
     class Meta:
         model = Order
-        fields = ('id', 'status', 'buyer', 'url')
+        fields = ('id', 'status', 'url')
 
 
 
