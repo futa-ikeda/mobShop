@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, DecimalField, IntegerField
 from rest_framework.relations import RelatedField
 
-from shopping.models import Product, CartItem, Order
+from shopping.models import Product, CartItem, Order, OrderStatus
 
 
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
@@ -37,12 +37,12 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('item', 'quantity', 'url', 'total', 'order')
 
 class OrderSerializer(serializers.HyperlinkedModelSerializer):
-    status = CharField(max_length=20, read_only=True)
+    status = CharField(max_length=20, default=OrderStatus.PENDING)
 
 
     def create(self, validated_data):
         buyer = self.context['request'].user
-        cartitems = self.context['request'].user.cartitem_set.all()
+        cartitems = buyer.cartitem_set.filter(order=None)
         if not cartitems:
             raise ValidationError('cart is empty')
         order = super().create(validated_data)
