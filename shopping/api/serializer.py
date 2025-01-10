@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, DecimalField, IntegerField
-from rest_framework.relations import RelatedField
 
 from shopping.models import Product, CartItem, Order, OrderStatus
 
@@ -36,9 +35,14 @@ class CartItemSerializer(serializers.HyperlinkedModelSerializer):
         model = CartItem
         fields = ('item', 'quantity', 'url', 'total', 'order')
 
-class OrderSerializer(serializers.HyperlinkedModelSerializer):
-    status = CharField(max_length=20, default=OrderStatus.PENDING)
 
+
+def validate_status(value):
+    if value not in OrderStatus:
+        raise ValidationError('This is not valid status')
+
+class OrderSerializer(serializers.HyperlinkedModelSerializer):
+    status = CharField(max_length=20, default=OrderStatus.PENDING, validators=[validate_status],)
 
     def create(self, validated_data):
         buyer = self.context['request'].user
